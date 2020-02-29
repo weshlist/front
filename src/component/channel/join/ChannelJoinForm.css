@@ -10,7 +10,7 @@
   border-bottom: 1px solid #c5f6fa;
 }
 
-.create-button {
+.join-button {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   padding-left: 1rem;
@@ -23,6 +23,6 @@
   cursor: pointer;
 }
 
-.create-button:hover {
+.join:hover {
   background: #3bc9db;
 }
