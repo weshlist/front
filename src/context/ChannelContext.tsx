@@ -1,11 +1,12 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
-
-const LOCAL_STORAGE_KEY = '__channel_data__'
+import React, { createContext, useState, useContext } from "react";
+import { HttpClient, WeshResult } from "../common/http";
+import { ChannelClient } from "../client/ChannelClient";
 
 export class ChannelData {
   constructor(
-    public roomId: string,
-    public roomName: string, 
+    public channelId: string,
+    public channelName: string, 
+    public streamUrl: string,
   ) { }
   
   // static load(): ChannelData | undefined {
@@ -28,35 +29,30 @@ export class ChannelData {
 
 interface CtxProps {
   data: ChannelData | undefined,
-  joinChannel: ChannelJoinHandler | undefined
+  joinChannel: ChannelJoinHandler
 }
 
-type ChannelJoinHandler = (roomName: string) => Promise<boolean>
+type ChannelJoinHandler = (channelName: string) => Promise<boolean>
 
 const ChannelContext = createContext<CtxProps> ({
   data: undefined,
-  joinChannel: undefined
+  joinChannel: async () => { 
+    console.error('channel context not initialized')
+    return false 
+  }
 })
 
 interface Props{}
 const ChannelProvider: React.FC<Props> = (props: Props) => {
-  const [channelData, setChannelData] = useState()
+  const [channelData, setChannelData] = useState<ChannelData>()
 
-  // const loadChannel = () => {
-  //   const channelData = ChannelData.load()
-  //   if (channelData !== undefined) {
-  //     setChannelData(channelData)
-  //   }
-  // }
-
-  const joinChannel = (roomName: string, res: any): boolean => {
-    const { roomId } = res
+  const joinChannel = (res: any): boolean => {
+    const { channelId, channelName, streamUrl } = res
     if (res === undefined) {
       return false;
     }
 
-    const channelData = new ChannelData(roomId, roomName)
-    // channelData.persist()
+    const channelData = new ChannelData(channelId, channelName, streamUrl)
 
     setChannelData(channelData)
     return true;
@@ -64,8 +60,19 @@ const ChannelProvider: React.FC<Props> = (props: Props) => {
 
   const ctxProps: CtxProps = {
     data: channelData,
-    joinChannel: async (roonName: string): Promise<boolean> => {
-      return joinChannel(roonName, {roomId: 100})
+    joinChannel: async (channelName: string): Promise<boolean> => {
+      const res = await ChannelClient.join("denn", channelName)
+
+      if (res.result) {
+        return joinChannel({
+          channelId: res.result.channelId, 
+          channelName: res.result.channelName, 
+          streamUrl: res.result.streamingUri && res.result.streamingUri !== "" ? 
+            res.result.streamingUri : "http://localhost:5000/get_m3u8"
+        })
+      } else {
+        return false
+      }
     }
   }
   
@@ -76,7 +83,7 @@ const ChannelProvider: React.FC<Props> = (props: Props) => {
   )
 }
 
-const useChannel = (): any => {
+const useChannel = (): CtxProps => {
   const context = useContext(ChannelContext)
   if (context === undefined) {
     throw new Error('useAuth must be used within a AuthProvider')

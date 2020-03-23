@@ -1,18 +1,18 @@
 import React, { ReactNode } from 'react';
 import './ChannelJoinTemplate.css'
 
-interface ChannelJoinTemplateProps {
+interface Props {
   form: ReactNode
 }
 
-const ChannelJoinTemplate = ({form} : ChannelJoinTemplateProps) => {
+const ChannelJoinTemplate: React.FC<Props> = (props : Props) => {
   return (
     <main className="channel-join-template">
       <div className="title">
         들어가고픈 채널
       </div>
       <section className="form-wrapper">
-        {form}
+        {props.form}
       </section>
     </main>
   )

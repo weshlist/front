@@ -1,27 +1,47 @@
-import React, { useState } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import './ChannelJoinForm.css';
 
 interface Props {
-  onJoinClick: (roomName: string) => void
+  onJoinClick: (channelName: string) => void
 }
 
-const ChannelJoinFormComponent: React.FC<Props> = (props: Props) => {
-  const [roomName, setRoomName] = useState()
+interface States {
+  channelName: string
+}
+export class ChannelJoinFormComponent extends Component<Props, States> {
+  constructor(props: Props) {
+    super(props)
+    console.log("hoho")
 
-  const handleSubmit = () => {
-    props.onJoinClick(roomName)
+    this.state = {
+      channelName: '',
+    }
   }
-  return (
-    <div className="form">
-      <input
-        value={roomName}
-        onChange={(e) => setRoomName(e.target.value)}
-        placeholder="Room Name" />
-      <button className="join-button" onClick={handleSubmit}>
-        Join
-      </button>
-    </div>
-  );
+
+  handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      channelName: e.target.value
+    })
+  }
+
+  handleSubmit = () => {
+    this.props.onJoinClick(this.state.channelName)
+  }
+
+  render() {
+    return (
+      <div className="form">
+        <input
+          value={this.state.channelName}
+          onChange={this.handleChange}
+          placeholder="Room Name" />
+        <button className="join-button" onClick={this.handleSubmit}>
+          Join
+        </button>
+      </div>
+    );
+  }
+  
 };
 
 export default ChannelJoinFormComponent;
